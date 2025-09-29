@@ -25,12 +25,16 @@ def process_pdf_files(file_list, fields_list):
 
         # OCR fallback
         if not full_text.strip():
-            pages = convert_from_path(pdf_path)
-            for i, page in enumerate(pages):
-                image_path = f"temp_images/{os.path.basename(pdf_path)}_page_{i}.png"
-                page.save(image_path, "PNG")
-                text = pytesseract.image_to_string(Image.open(image_path))
-                full_text += text + "\n"
+            try:
+                pages = convert_from_path(pdf_path)
+                for i, page in enumerate(pages):
+                    image_path = f"temp_images/{os.path.basename(pdf_path)}_page_{i}.png"
+                    page.save(image_path, "PNG")
+                    text = pytesseract.image_to_string(Image.open(image_path))
+                    full_text += text + "\n"
+            except Exception as e:
+                print(f"OCR failed due to missing dependencies or error: {e}. Skipping OCR.")
+                # If OCR fails, proceed without it; full_text remains empty or partial
 
         # Split into invoice blocks (only when "Invoice Number:" exists)
         blocks = re.split(r"(?=Invoice Number:\s*INV-\d+)", full_text, flags=re.IGNORECASE)

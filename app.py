@@ -1,9 +1,9 @@
 from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-import shutil, os
+import shutil, os, io
 from extractor import process_pdf_files
 
 app = FastAPI()
@@ -37,8 +37,16 @@ async def upload_pdfs_web(files: list[UploadFile] = File(...), fields: str = For
     # Call updated extractor
     output_excel = process_pdf_files(saved_files, fields_list)
 
-    return FileResponse(
-        output_excel,
+    with open(output_excel, 'rb') as f:
+        excel_bytes = f.read()
+
+    # Clean up files
+    os.remove(output_excel)
+    for file_path in saved_files:
+        os.remove(file_path)
+
+    return StreamingResponse(
+        io.BytesIO(excel_bytes),
         media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        filename="extracted_data.xlsx"
+        headers={"Content-Disposition": "attachment; filename=extracted_data.xlsx"}
     )
