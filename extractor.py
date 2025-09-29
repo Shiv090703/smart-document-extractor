@@ -3,10 +3,7 @@ def process_pdf_files(file_list, fields_list):
     Extracts user-defined fields from a list of PDF files, supports multiple invoices per PDF,
     removes duplicates, and saves them in Excel.
     """
-    import pdfplumber, pytesseract, pandas as pd, re
-    from pdf2image import convert_from_path
-    from PIL import Image
-    import os
+    import pdfplumber, pandas as pd, re, os
 
     all_data = []
     os.makedirs("temp_images", exist_ok=True)
@@ -26,6 +23,9 @@ def process_pdf_files(file_list, fields_list):
         # OCR fallback
         if not full_text.strip():
             try:
+                from pdf2image import convert_from_path
+                from PIL import Image
+                import pytesseract
                 pages = convert_from_path(pdf_path)
                 for i, page in enumerate(pages):
                     image_path = f"temp_images/{os.path.basename(pdf_path)}_page_{i}.png"
