@@ -1,241 +1,297 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Smart Document Extractor</title>
-<!-- Bootstrap CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Icons -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-<style>
-    html, body {
-        height: 100%;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-    }
-    body {
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        flex: 1 0 auto;
-    }
-    header {
-        background-color: #343a40;
-        color: white;
-        padding: 20px 0;
-        text-align: center;
-    }
-    header h1 { font-weight: 700; margin-bottom: 5px; font-size: 1.8rem; }
-    header p { font-size: 1.1rem; margin-bottom: 0; }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <title>Smart Document Extractor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        body {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            flex: 1 0 auto;
+        }
+        header {
+            background-color: #343a40;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        header h1 { font-weight: 700; margin-bottom: 5px; font-size: 1.8rem; }
+        header p { font-size: 1.1rem; margin-bottom: 0; }
 
-    .container {
-        flex: 1 0 auto;
-        padding-bottom: 50px; /* space for footer */
-    }
+        .container { flex: 1 0 auto; padding-bottom: 50px; }
 
-    .card {
-        margin: 50px auto;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-    }
-    .file-list div {
-        margin: 5px 0;
-        padding: 8px 12px;
-        background-color: #f1f3f5;
-        border-radius: 8px;
-        font-weight: 500;
-        word-break: break-word;
-    }
-    .btn-primary {
-        background: linear-gradient(90deg, #6f42c1, #6610f2);
-        border: none;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(90deg, #6610f2, #6f42c1);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    }
-    footer {
-        background-color: #343a40;
-        color: white;
-        padding: 15px 10px;
-        text-align: center;
-        flex-shrink: 0;
-    }
-    footer a {
-        color: #ffc107;
-        text-decoration: none;
-        font-weight: bold;
-    }
-    footer a:hover { text-decoration: underline; }
+        .card {
+            margin: 50px auto;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.2); }
 
-    /* Loading overlay */
-    #loadingOverlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255,255,255,0.8);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-        flex-direction: column;
-        padding: 20px;
-    }
-    #loadingOverlay .spinner-border {
-        width: 4rem;
-        height: 4rem;
-        margin-bottom: 15px;
-    }
-    #progressContainer {
-        width: 80%;
-        max-width: 400px;
-        display: none;
-    }
+        .file-list div {
+            margin: 5px 0;
+            padding: 8px 12px;
+            background-color: #f1f3f5;
+            border-radius: 8px;
+            font-weight: 500;
+            word-break: break-word;
+        }
 
-    /* Responsive adjustments */
-    @media (max-width: 576px) {
-        .card { padding: 20px; margin: 30px 10px; }
-        header h1 { font-size: 1.5rem; }
-        header p { font-size: 1rem; }
-        .btn-primary { font-size: 0.9rem; }
-        #progressContainer { width: 90%; }
-    }
-</style>
-</head>
-<body>
+        /* Dropzone style */
+        .dropzone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #6c757d;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .dropzone:hover { background-color: #e9ecef; }
+        .dropzone.dragover { background-color: #dee2e6; border-color: #495057; }
 
-<header>
-    <h1><i class="bi bi-file-earmark-text"></i> Smart Document Extractor</h1>
-    <p>Upload your PDFs and extract any fields you need!</p>
-</header>
+        .btn-primary {
+            background: linear-gradient(90deg, #6f42c1, #6610f2);
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #6610f2, #6f42c1);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
 
-<div class="container">
-    <div class="card col-md-8 col-12">
-        <form id="extractForm" action="/upload_web/" method="post" enctype="multipart/form-data">
-            <div class="mb-3">
-                <label class="form-label"><i class="bi bi-upload"></i> Select PDFs</label>
-                <input type="file" name="files" multiple class="form-control" id="fileInput" required>
-                <div id="fileList" class="file-list"></div>
-            </div>
+        footer {
+            background-color: #343a40;
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        footer a { color: #ffc107; text-decoration: none; font-weight: bold; }
+        footer a:hover { text-decoration: underline; }
 
-            <div class="mb-3">
-                <label class="form-label"><i class="bi bi-pencil-square"></i> Fields to Extract (comma separated)</label>
-                <input type="text" name="fields" class="form-control" placeholder="Invoice Number, Customer Name, Amount" required>
-            </div>
+        /* Loading overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            padding: 20px;
+        }
+        #loadingOverlay .spinner-border { width: 4rem; height: 4rem; margin-bottom: 15px; }
+        #progressContainer { width: 80%; max-width: 400px; display: none; }
 
-            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-file-earmark-arrow-down"></i> Upload & Extract</button>
-        </form>
-    </div>
-</div>
+        @media (max-width: 576px) {
+            .card { padding: 20px; margin: 30px 10px; }
+            header h1 { font-size: 1.5rem; }
+            header p { font-size: 1rem; }
+            .btn-primary { font-size: 0.9rem; }
+            #progressContainer { width: 90%; }
+        }
+    </style>
+    </head>
+    <body>
 
-<!-- Loading overlay -->
-<div id="loadingOverlay">
-    <div class="spinner-border text-primary" role="status"></div>
-    <div class="mb-2 text-center">Processing files, please wait...</div>
-    <div id="progressContainer">
-        <div class="progress">
-            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                 style="width: 0%">0%</div>
+    <header>
+        <h1><i class="bi bi-file-earmark-text"></i> Smart Document Extractor</h1>
+        <p>Upload your PDFs and extract any fields you need!</p>
+    </header>
+    <!-- AI under development message -->
+        <div class="alert alert-warning text-center mb-0" role="alert">
+            ⚠️ AI feature is under development. Suggestions may not be available yet.
+            <br>
+            Type the exact field name that you want to extract in EXL.
+        </div>
+
+    <div class="container">
+        <div class="card col-md-8 col-12">
+            <form id="extractForm" action="/upload_web/" method="post" enctype="multipart/form-data">
+
+                <!-- Dropzone Upload -->
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-upload"></i> Select PDFs</label>
+                    <div id="dropzone" class="dropzone">
+                        <div class="text-center">
+                            <i class="bi bi-cloud-arrow-up" style="font-size:2rem; color:#6c757d;"></i>
+                            <p class="mt-2 mb-0">Drag & Drop files here</p>
+                            <p class="text-muted small">or click to select (PDF only)</p>
+                        </div>
+                        <input id="fileInput" name="files" type="file" multiple class="d-none" required>
+                    </div>
+                    <div id="fileList" class="file-list mt-3"></div>
+                </div>
+
+                <!-- AI field suggestion -->
+                <div class="mb-3">
+                    <label class="form-label"><i class="bi bi-magic"></i> Fields to Extract</label>
+                    <div class="input-group">
+                        <input type="text" name="fields" id="fieldsInput" class="form-control" placeholder="Invoice Number, Customer Name, Amount" required>
+                        <button type="button" id="aiSuggestBtn" class="btn btn-outline-secondary"><i class="bi bi-stars"></i> AI Suggest</button>
+                    </div>
+                    <div id="aiSuggestions" class="mt-2 text-muted small"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-file-earmark-arrow-down"></i> Upload & Extract</button>
+            </form>
         </div>
     </div>
-</div>
 
-<footer>
-    <p>© 2025 Smart Document Extractor | Powered by Free Tools</p>
-    <p>
-        All rights reserved. Made with ❤️ by 
-        <a href="https://shivamranamy-portfolio.vercel.app/" target="_blank">Shivam Rana</a>
-    </p>
-</footer>
+    <!-- Loading overlay -->
+    <div id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="mb-2 text-center">Processing files, please wait...</div>
+        <div id="progressContainer">
+            <div class="progress">
+                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                    style="width: 0%">0%</div>
+            </div>
+        </div>
+    </div>
 
-<script>
-const fileInput = document.getElementById('fileInput');
-const fileList = document.getElementById('fileList');
-const extractForm = document.getElementById('extractForm');
-const loadingOverlay = document.getElementById('loadingOverlay');
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progressBar');
+    <footer>
+        <p>© 2025 Smart Document Extractor | Powered by Free Tools</p>
+        <p>
+            All rights reserved. Made with ❤️ by 
+            <a href="https://shivamranamy-portfolio.vercel.app/" target="_blank">Shivam Rana</a>
+        </p>
+    </footer>
 
-// Show selected file names
-fileInput.addEventListener('change', () => {
-    fileList.innerHTML = '';
-    for (let i = 0; i < fileInput.files.length; i++) {
-        const div = document.createElement('div');
-        div.textContent = fileInput.files[i].name;
-        fileList.appendChild(div);
-    }
-});
+    <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const extractForm = document.getElementById('extractForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const aiSuggestBtn = document.getElementById('aiSuggestBtn');
+    const aiSuggestions = document.getElementById('aiSuggestions');
+    const fieldsInput = document.getElementById('fieldsInput');
 
-// Handle form submission with fetch + progress simulation
-extractForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+    // Dropzone click
+    dropzone.addEventListener('click', () => fileInput.click());
 
-    const formData = new FormData(extractForm);
-    loadingOverlay.style.display = 'flex';
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-    progressBar.textContent = '0%';
+    // Drag & drop highlight
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+        showFiles();
+    });
 
-    let progress = 0;
-    const interval = setInterval(() => {
-        if (progress < 90) {
-            progress += 5;
-            progressBar.style.width = progress + '%';
-            progressBar.textContent = progress + '%';
+    // Show selected file names
+    fileInput.addEventListener('change', showFiles);
+    function showFiles() {
+        fileList.innerHTML = '';
+        for (let i = 0; i < fileInput.files.length; i++) {
+            const div = document.createElement('div');
+            div.textContent = fileInput.files[i].name;
+            fileList.appendChild(div);
         }
-    }, 200);
+    }
 
-    try {
-        const response = await fetch(extractForm.action, {
-            method: 'POST',
-            body: formData
-        });
+    // Handle form submission with fetch + progress simulation
+    extractForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(extractForm);
+        loadingOverlay.style.display = 'flex';
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressBar.textContent = '0%';
 
-        if (!response.ok) throw new Error('Network error');
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < 90) {
+                progress += 5;
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress + '%';
+            }
+        }, 200);
 
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "extracted_data.xlsx";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+        try {
+            const response = await fetch(extractForm.action, {
+                method: 'POST',
+                body: formData
+            });
 
-        clearInterval(interval);
-        progressBar.style.width = '100%';
-        progressBar.textContent = '100%';
+            if (!response.ok) throw new Error('Network error');
 
-        setTimeout(() => {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "extracted_data.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            clearInterval(interval);
+            progressBar.style.width = '100%';
+            progressBar.textContent = '100%';
+
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+                progressBar.textContent = '0%';
+                extractForm.reset();
+                fileList.innerHTML = '';
+            }, 500);
+
+        } catch (err) {
+            clearInterval(interval);
+            alert('Error: ' + err.message);
             loadingOverlay.style.display = 'none';
             progressContainer.style.display = 'none';
             progressBar.style.width = '0%';
             progressBar.textContent = '0%';
-            extractForm.reset();
-            fileList.innerHTML = '';
-        }, 500);
+        }
+    });
 
-    } catch (err) {
-        clearInterval(interval);
-        alert('Error: ' + err.message);
-        loadingOverlay.style.display = 'none';
-        progressContainer.style.display = 'none';
-        progressBar.style.width = '0%';
-        progressBar.textContent = '0%';
-    }
-});
-</script>
+    // AI Suggest button
+    aiSuggestBtn.addEventListener('click', async () => {
+        aiSuggestions.innerHTML = '<i class="bi bi-hourglass-split"></i> AI is analyzing...';
 
-</body>
-</html>
+        try {
+            // Dummy AI call - replace /ai_suggest with backend endpoint
+            const response = await fetch('/ai_suggest', { method: 'POST' });
+            if (!response.ok) throw new Error('AI service unavailable');
+
+            const suggestions = await response.json(); // expect {fields: ["Invoice Number", "Date", ...]}
+            aiSuggestions.innerHTML = '✨ Suggested fields: ' + suggestions.fields.join(', ');
+            fieldsInput.value = suggestions.fields.join(', ');
+
+        } catch (err) {
+            aiSuggestions.innerHTML = '<span class="text-danger">AI Error: ' + err.message + '</span>';
+        }
+    });
+    </script>
+
+    </body>
+    </html>
