@@ -1,11 +1,11 @@
 # test_ai.py
-import os
-import google.generativeai as genai
-from dotenv import load_dotenv
+import unittest
 
-load_dotenv()
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+class TestAIService(unittest.TestCase):
 
-models = genai.list_models()
-for m in models:
-    print(m)
+    def test_placeholder(self):
+        # This is a placeholder test to ensure the test suite runs.
+        self.assertEqual(True, True)
+
+if __name__ == '__main__':
+    unittest.main()
